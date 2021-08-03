@@ -1,0 +1,27 @@
+version: '3.7'
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    privileged: true
+    user: root
+    ports:
+      - 8083:8080
+    container_name: my-jenkins
+    volumes:
+      - ~/jenkins_data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+  jjb:
+    image: python:3.7-alpine
+    privileged: true
+    container_name: jjb
+    volumes:
+      - ./jenkins-jobs:/var/jenkins-jobs
+      - ./jenkins-jobs/jenkins-jobs.ini:/etc/jenkins_jobs/jenkins-jobs.ini
+    restart: on-failure
+    working_dir: /var/jenkins-jobs
+    command:
+      - /bin/sh
+      - -c
+      - |
+        pip install jenkins-job-builder
+        sleep infinity

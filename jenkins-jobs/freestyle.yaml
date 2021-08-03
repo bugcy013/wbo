@@ -1,0 +1,10 @@
+- job:
+    name: hello_freestyle
+    parameters:
+      - string:
+          name: message
+          default: Hello Woorld
+    description: 'Automatically generated test'
+    project-type: freestyle
+    builders:
+      - shell: 'echo $message'

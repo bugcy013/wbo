@@ -1,0 +1,69 @@
+- job:
+    name: hello_dsl
+    wrappers:
+      - timeout:
+          timeout: 120
+          fail: true
+    logrotate:
+      daysToKeep: 3
+      numToKeep: 20
+    parameters:
+      - string:
+          name: message
+          default: Hello World
+          description: "A parameter named 'message', defaults to 'Hello World'."
+    project-type: pipeline
+    auth-token: BUILD_ME
+    sandbox: true
+    dsl: |
+      pipeline {
+        agent { label 'metal-amd64' }
+        environment {
+            HELLO = "DSL-${currentBuild.getNumber()}"
+        }
+        stages {
+            stage ('CLONE Repo') {
+                steps {
+                    deleteDir()
+                    git url: 'https://github.com/apache/airflow.git', branch: 'master'
+                }
+            }
+            stage ('Run the unit test cases') {
+                steps {
+                    sh "echo "run the unit tests""
+                }
+            }
+            stage ('Run the Integration tests') {
+                steps {
+                    sh 'echo "run the integration tests"'
+                }
+            }
+            stage ('Git tag') {
+                steps {
+                    sh 'echo "let's create tag"'
+                }
+              steps {
+                  sh 'echo "let's push tag to master"'
+              }
+            }
+          stage ('Build Image') {
+              steps {
+                  sh 'echo "checkout the version"'
+              }
+              steps {
+                  sh 'echo "run the docker build and push the image registory"'
+              }
+          }
+        }
+        post {
+            always {
+                sh 'echo "build completed'
+            }
+            success {
+                sh 'echo "send slack success notification to dev and ops guys"'
+            }
+            failure {
+                sh 'echo "send slack failure notification to dev and ops guys to take imidiate action"'
+            }
+        }
+      }
